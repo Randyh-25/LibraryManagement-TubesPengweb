@@ -2,7 +2,7 @@ import enum
 
 from sqlalchemy import Column, DateTime, Enum, Integer, String, func
 from sqlalchemy.orm import relationship
-from passlib.hash import bcrypt
+from passlib.hash import pbkdf2_sha256, bcrypt_sha256, bcrypt
 
 from . import Base
 
@@ -25,10 +25,23 @@ class User(Base):
     borrowings = relationship("Borrowing", back_populates="member", cascade="all, delete-orphan")
 
     def set_password(self, raw_password: str) -> None:
-        self.password_hash = bcrypt.hash(raw_password)
+        # Use pbkdf2_sha256 to avoid bcrypt 72-byte limits and backend quirks
+        self.password_hash = pbkdf2_sha256.hash(raw_password)
 
     def verify_password(self, raw_password: str) -> bool:
-        return bcrypt.verify(raw_password, self.password_hash)
+        # Try primary scheme first; fall back to legacy hashes if they exist
+        try:
+            return pbkdf2_sha256.verify(raw_password, self.password_hash)
+        except ValueError:
+            pass
+        try:
+            return bcrypt_sha256.verify(raw_password, self.password_hash)
+        except ValueError:
+            pass
+        try:
+            return bcrypt.verify(raw_password, self.password_hash)
+        except ValueError:
+            return False
 
 
 __all__ = ["User", "UserRole"]

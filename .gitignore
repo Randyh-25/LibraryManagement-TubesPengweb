@@ -1,7 +1,9 @@
 # Dependencies
 backend/.venv/
+backend/__pycache__
 node_modules/
 venv/
+.venv/
 env/
 *.egg-info/
 dist/
