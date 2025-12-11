@@ -22,6 +22,10 @@ async function apiFetch(path, { method = "GET", token, body } = {}) {
   return data;
 }
 
+export const statusApi = {
+  check: () => apiFetch("/status"),
+};
+
 export const authApi = {
   register: (payload) => apiFetch("/auth/register", { method: "POST", body: payload }),
   login: (payload) => apiFetch("/auth/login", { method: "POST", body: payload }),
