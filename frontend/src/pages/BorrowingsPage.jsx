@@ -1,46 +1,44 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { borrowApi } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
 export default function BorrowingsPage() {
   const { token, user } = useAuth();
-  const [items, setItems] = useState([]);
+  const queryClient = useQueryClient();
+
   const [activeOnly, setActiveOnly] = useState(true);
   const [memberId, setMemberId] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await borrowApi.listBorrowings(token, {
-        active: activeOnly,
-        member_id: user.role === "librarian" && memberId ? memberId : undefined,
-      });
-      setItems(res.items || []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  const queryParams = {
+    active: activeOnly,
+    member_id: user.role === "librarian" && memberId ? memberId : undefined,
   };
 
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const {
+    data: items,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["borrowings", queryParams],
+    queryFn: () => borrowApi.listBorrowings(token, queryParams),
+    initialData: { items: [] },
+  });
 
-  const handleReturn = async (id) => {
-    try {
-      await borrowApi.returnBook(token, id);
-      fetchData();
+  const returnMutation = useMutation({
+    mutationFn: (id) => borrowApi.returnBook(token, id),
+    onSuccess: () => {
       toast.success("Book returned successfully");
-    } catch (err) {
+      queryClient.invalidateQueries(["borrowings"]);
+      queryClient.invalidateQueries(["books"]); // Also invalidate books query
+    },
+    onError: (err) => {
       toast.error(err.message);
-    }
-  };
+    },
+  });
 
   return (
     <div className="card">
@@ -61,17 +59,17 @@ export default function BorrowingsPage() {
             onChange={(e) => setMemberId(e.target.value)}
           />
         )}
-        <button className="btn ghost" onClick={fetchData}>
+        <button className="btn ghost" onClick={() => refetch()}>
           Refresh
         </button>
       </div>
-      {loading ? (
+      {isLoading ? (
         <div>Loading...</div>
-      ) : error ? (
-        <div className="error">{error}</div>
+      ) : isError ? (
+        <div className="error">{error.message}</div>
       ) : (
         <div className="list">
-          {items.map((b) => (
+          {items.items.map((b) => (
             <div key={b.id} className="item">
               <div>
                 <strong>{b.book.title}</strong> by {b.book.author}
@@ -84,7 +82,11 @@ export default function BorrowingsPage() {
               </div>
               <div className="actions">
                 {!b.return_date && (
-                  <button className="btn ghost" onClick={() => handleReturn(b.id)}>
+                  <button
+                    className="btn ghost"
+                    onClick={() => returnMutation.mutate(b.id)}
+                    disabled={returnMutation.isPending}
+                  >
                     Mark Returned
                   </button>
                 )}
