@@ -1,4 +1,6 @@
 def includeme(config):
+    config.add_route("status", "/api/status")
+
     config.add_route("auth.register", "/api/auth/register")
     config.add_route("auth.login", "/api/auth/login")
 
