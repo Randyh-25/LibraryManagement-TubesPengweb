@@ -1,7 +1,46 @@
 :root {
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #0f172a;
-  background-color: #f8fafc;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #475569;
+  --border-color: #e5e7eb;
+  --accent-color: #2563eb;
+  --accent-color-hover: #1d4ed8;
+  --accent-text-color: #ffffff;
+  --error-color: #b91c1c;
+  --error-bg-color: #fee2e2;
+  --nav-bg: #1e293b;
+  --nav-text: #cbd5e1;
+  --nav-text-active: #ffffff;
+  --nav-pill-bg: #334155;
+  --nav-pill-text: #e2e8f0;
+  --nav-ghost-border: #94a3b8;
+  --nav-ghost-text: #e2e8f0;
+}
+
+.dark {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --bg-tertiary: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --border-color: #374151;
+  --accent-color: #3b82f6;
+  --accent-color-hover: #60a5fa;
+  --accent-text-color: #111827;
+  --error-color: #f87171;
+  --error-bg-color: #450a0a;
+  --nav-bg: #111827;
+  --nav-text: #9ca3af;
+  --nav-text-active: #ffffff;
+  --nav-pill-bg: #4b5563;
+  --nav-pill-text: #e5e7eb;
+  --nav-ghost-border: #4b5563;
+  --nav-ghost-text: #d1d5db;
 }
 
 * {
@@ -10,7 +49,9 @@
 
 body {
   margin: 0;
-  background: #eef2ff;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .app-shell {
@@ -22,22 +63,22 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: #1e293b;
-  color: #fff;
+  background-color: var(--nav-bg);
+  color: var(--nav-text-active);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .nav a {
-  color: #cbd5e1;
+  color: var(--nav-text);
   margin-right: 12px;
   text-decoration: none;
   font-weight: 500;
 }
 
 .nav a.active {
-  color: #fff;
+  color: var(--nav-text-active);
   text-decoration: underline;
 }
 
@@ -49,17 +90,18 @@ body {
 .nav .pill {
   padding: 4px 10px;
   border-radius: 999px;
-  background: #334155;
-  color: #e2e8f0;
+  background-color: var(--nav-pill-bg);
+  color: var(--nav-pill-text);
   margin-right: 8px;
 }
 
 .nav .ghost {
   background: transparent;
-  border: 1px solid #94a3b8;
-  color: #e2e8f0;
+  border: 1px solid var(--nav-ghost-border);
+  color: var(--nav-ghost-text);
   padding: 6px 10px;
   cursor: pointer;
+  border-radius: 6px;
 }
 
 .content {
@@ -69,11 +111,12 @@ body {
 }
 
 .card {
-  background: #fff;
+  background-color: var(--bg-primary);
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--text-primary) 8%, transparent);
   margin-bottom: 16px;
+  border: 1px solid var(--border-color);
 }
 
 .card.narrow {
@@ -85,6 +128,7 @@ h1,
 h2,
 h3 {
   margin-top: 0;
+  color: var(--text-primary);
 }
 
 .form {
@@ -103,6 +147,7 @@ label span {
   display: block;
   margin-bottom: 4px;
   font-weight: 600;
+  color: var(--text-secondary);
 }
 
 input,
@@ -117,21 +162,31 @@ select,
 textarea {
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .btn {
-  background: #2563eb;
-  color: #fff;
+  background-color: var(--accent-color);
+  color: var(--accent-text-color);
   border: none;
   padding: 10px 14px;
   border-radius: 8px;
   cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn:hover {
+  background-color: var(--accent-color-hover);
 }
 
 .btn.ghost {
-  background: #e2e8f0;
-  color: #0f172a;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .actions {
@@ -151,19 +206,19 @@ textarea {
   justify-content: space-between;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
-  background: #f8fafc;
+  background-color: var(--bg-tertiary);
 }
 
 .muted {
-  color: #475569;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
 .error {
-  color: #b91c1c;
-  background: #fee2e2;
+  color: var(--error-color);
+  background-color: var(--error-bg-color);
   padding: 8px 10px;
   border-radius: 8px;
   display: inline-block;
@@ -178,6 +233,7 @@ textarea {
 
 .bullets {
   padding-left: 16px;
+  color: var(--text-secondary);
 }
 
 .bullets li {
