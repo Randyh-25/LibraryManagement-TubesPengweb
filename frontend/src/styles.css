@@ -101,6 +101,44 @@ body {
   font-size: 0.875rem;
 }
 
+.nav .role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+  border: 1.5px solid;
+  transition: all 0.2s ease;
+}
+
+.nav .role-librarian {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.15) 100%);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+}
+
+.nav .role-member {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.dark .role-librarian {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #93c5fd;
+}
+
+.dark .role-member {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #6ee7b7;
+}
+
 .nav .user-name {
   font-weight: 500;
   color: var(--nav-text-active);
@@ -288,6 +326,7 @@ textarea {
 
 .number-input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .number-btn {
