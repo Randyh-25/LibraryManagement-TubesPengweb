@@ -37,7 +37,9 @@ export default function NavBar() {
         </button>
         {user ? (
           <>
-            <span className="pill">{user.role}</span>
+            <span className={`role-badge role-${user.role}`}>
+              {user.role}
+            </span>
             <span className="user-name">{user.name}</span>
             <button className="ghost logout-btn" onClick={logout}>
               Logout
