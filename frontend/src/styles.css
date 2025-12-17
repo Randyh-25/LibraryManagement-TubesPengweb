@@ -245,6 +245,75 @@ textarea {
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
 }
 
+/* Number Input Styling */
+.number-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  transition: all 0.2s ease;
+  max-width: 140px;
+}
+
+.number-input-wrapper:focus-within {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.number-input {
+  flex: 1;
+  border: none;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  background-color: transparent;
+  color: var(--text-primary);
+  min-width: 40px;
+}
+
+.number-input:focus {
+  outline: none;
+}
+
+/* Remove default number input arrows */
+.number-input::-webkit-inner-spin-button,
+.number-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.number-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.number-btn {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: none;
+  padding: 6px 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.number-btn:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.number-btn:active {
+  transform: scale(0.95);
+}
+
 .actions {
   display: flex;
   align-items: center;
