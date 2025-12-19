@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { cloudinaryApi } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 
 export default function BookForm({ initial, onSubmit, onCancel }) {
-  const [previewImage, setPreviewImage] = useState(initial?.cover_image_url || "");
+  const [previewImage, setPreviewImage] = useState(initial?.cover_url || "");
   const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const { token } = useAuth();
   
   const {
     register,
@@ -20,11 +24,11 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
       category: "",
       copies_total: 1,
       copies_available: 1,
-      cover_image_url: "",
+      cover_url: "",
     },
   });
 
-  const processImageFile = (file) => {
+  const processImageFile = async (file) => {
     if (!file) return;
     
     // Check file size (max 5MB)
@@ -40,11 +44,23 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      console.log("Image loaded, size:", reader.result.length, "bytes");
-      setPreviewImage(reader.result);
-      setValue("cover_image_url", reader.result);
-      console.log("Cover image URL set:", reader.result.substring(0, 100) + "...");
+    reader.onloadend = async () => {
+      const base64Image = reader.result;
+      setPreviewImage(base64Image);
+      
+      // Upload to Cloudinary
+      try {
+        setUploading(true);
+        const result = await cloudinaryApi.uploadImage(token, base64Image);
+        console.log("Image uploaded to Cloudinary:", result.url);
+        setValue("cover_url", result.url);
+      } catch (error) {
+        console.error("Failed to upload image:", error);
+        alert("Failed to upload image: " + error.message);
+        setPreviewImage("");
+      } finally {
+        setUploading(false);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -102,16 +118,20 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
       category: "",
       copies_total: 1,
       copies_available: 1,
-      cover_image_url: "",
+      cover_url: "",
     };
     reset(defaultValues);
-    setPreviewImage(initial?.cover_image_url || "");
+    setPreviewImage(initial?.cover_url || "");
   }, [initial, reset]);
 
   const handleFormSubmit = (data) => {
+    if (uploading) {
+      alert("Please wait for image upload to complete");
+      return;
+    }
     console.log("Form submitted with data:", {
       ...data,
-      cover_image_url: data.cover_image_url ? data.cover_image_url.substring(0, 100) + "..." : "empty"
+      cover_url: data.cover_url ? data.cover_url.substring(0, 100) + "..." : "empty"
     });
     onSubmit(data);
   };
@@ -151,7 +171,7 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
           <span>Book Cover Image (optional)</span>
           <div className="image-upload-container">
             <div 
-              className={`drop-zone ${isDragging ? 'dragging' : ''}`}
+              className={`drop-zone ${isDragging ? 'dragging' : ''} ${uploading ? 'uploading' : ''}`}
               onDragEnter={handleDragEnter}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -163,16 +183,26 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
                 onChange={handleImageChange}
                 style={{ display: 'none' }}
                 id="cover-image-upload"
+                disabled={uploading}
               />
               <div className="drop-zone-content">
-                <div className="drop-zone-icon">📷</div>
-                <label htmlFor="cover-image-upload" className="upload-button">
-                  Choose Image
-                </label>
-                <p className="drop-zone-text">or drag and drop image here</p>
+                {uploading ? (
+                  <>
+                    <div className="drop-zone-icon">⏳</div>
+                    <p className="drop-zone-text">Uploading to Cloudinary...</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="drop-zone-icon">📷</div>
+                    <label htmlFor="cover-image-upload" className="upload-button">
+                      Choose Image
+                    </label>
+                    <p className="drop-zone-text">or drag and drop image here</p>
+                  </>
+                )}
               </div>
             </div>
-            {previewImage && (
+            {previewImage && !uploading && (
               <div className="image-preview">
                 <img src={previewImage} alt="Book cover preview" />
                 <button 
@@ -180,7 +210,7 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
                   className="remove-image-btn"
                   onClick={() => {
                     setPreviewImage("");
-                    setValue("cover_image_url", "");
+                    setValue("cover_url", "");
                     document.getElementById('cover-image-upload').value = "";
                   }}
                 >
@@ -191,9 +221,9 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
           </div>
         </label>
         <small style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
-          Upload a book cover image (Max 5MB, JPG/PNG)
+          Upload a book cover image (Max 5MB, JPG/PNG) - will be uploaded to Cloudinary
         </small>
-        <input type="hidden" {...register("cover_image_url")} />
+        <input type="hidden" {...register("cover_url")} />
       </div>
       <div className="form-group">
         <label>
