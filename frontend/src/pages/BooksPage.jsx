@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { bookApi, borrowApi } from "../api/client";
@@ -38,11 +38,41 @@ export default function BooksPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
-  const [editing, setEditing] = useState(null);
+  const [editorBook, setEditorBook] = useState(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const isLibrarian = user?.role === "librarian";
 
   const queryParams = { search, category, page };
+
+  const formId = editorBook?.id ? `book-form-${editorBook.id}` : "book-form-new";
+
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    if (isEditorOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = originalOverflow || "";
+    }
+    return () => {
+      document.body.style.overflow = originalOverflow || "";
+    };
+  }, [isEditorOpen]);
+
+  const openCreate = () => {
+    setEditorBook(null);
+    setIsEditorOpen(true);
+  };
+
+  const openEdit = (book) => {
+    setEditorBook(book);
+    setIsEditorOpen(true);
+  };
+
+  const closeEditor = () => {
+    setIsEditorOpen(false);
+    setEditorBook(null);
+  };
 
   const {
     data,
@@ -59,7 +89,7 @@ export default function BooksPage() {
     mutationFn: (newData) => bookApi.create(token, newData),
     onSuccess: () => {
       toast.success("Book created successfully");
-      setEditing(null);
+      closeEditor();
       queryClient.invalidateQueries(["books"]);
     },
     onError: (err) => {
@@ -71,7 +101,7 @@ export default function BooksPage() {
     mutationFn: ({ id, data }) => bookApi.update(token, id, data),
     onSuccess: () => {
       toast.success("Book updated successfully");
-      setEditing(null);
+      closeEditor();
       queryClient.invalidateQueries(["books"]);
     },
     onError: (err) => {
@@ -112,6 +142,14 @@ export default function BooksPage() {
     queryClient.invalidateQueries(["books", { search, category, page: 1 }]);
   };
 
+  const handleSubmit = (payload) => {
+    if (editorBook?.id) {
+      updateMutation.mutate({ id: editorBook.id, data: payload });
+    } else {
+      createMutation.mutate(payload);
+    }
+  };
+
   const books = data?.items || [];
   const totalPages = data?.total_pages || 1;
 
@@ -123,9 +161,7 @@ export default function BooksPage() {
           <p className="books-subtitle">Cari, kelola, dan pinjam buku</p>
         </div>
         {isLibrarian && (
-          <button className="btn" onClick={() => setEditing({})}>
-            + Tambah Buku
-          </button>
+          <button className="btn" onClick={openCreate}>+ Tambah Buku</button>
         )}
       </div>
 
@@ -206,7 +242,7 @@ export default function BooksPage() {
                     <>
                       <button 
                         className="btn ghost"
-                        onClick={() => setEditing(b)}
+                        onClick={() => openEdit(b)}
                         title="Edit"
                       >
                         Edit
@@ -246,19 +282,48 @@ export default function BooksPage() {
           />
         </>
       )}
-
-      {isLibrarian && (
-        <div className="card">
-          <h3>{editing ? "Edit Buku" : "Tambah Buku"}</h3>
-          <BookForm
-            initial={editing || undefined}
-            onSubmit={(data) =>
-              editing
-                ? updateMutation.mutate({ id: editing.id, data })
-                : createMutation.mutate(data)
-            }
-            onCancel={() => setEditing(null)}
-          />
+      {isEditorOpen && (
+        <div className="modal-backdrop" onClick={closeEditor}>
+          <div
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label={editorBook?.id ? "Edit buku" : "Tambah buku"}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div>
+                <p className="eyebrow">Kelola Buku</p>
+                <h2 style={{ margin: "4px 0 6px 0" }}>{editorBook?.id ? "Edit Buku" : "Tambah Buku"}</h2>
+                <p className="muted">Lengkapi data judul, identitas, dan stok koleksi.</p>
+              </div>
+              <div className="modal-header-actions">
+                <div className="editor-badges" style={{ alignItems: "center" }}>
+                  <span className="chip">{editorBook?.id ? "Mode edit" : "Mode tambah"}</span>
+                  {editorBook?.id && <span className="chip hollow">ID {editorBook.id}</span>}
+                </div>
+                <div className="modal-header-buttons">
+                  <button className="btn ghost" type="button" onClick={closeEditor}>
+                    Batal
+                  </button>
+                  <button className="btn" type="submit" form={formId}>
+                    Simpan
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="modal-body">
+              <div className="card editor-card">
+                <BookForm
+                  initial={editorBook || undefined}
+                  onSubmit={handleSubmit}
+                  onCancel={closeEditor}
+                  formId={formId}
+                  showActions={false}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
