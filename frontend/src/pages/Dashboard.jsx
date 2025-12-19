@@ -33,7 +33,7 @@ export default function Dashboard() {
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">Welcome to LibraryOne</h1>
+          <h1 className="hero-title">Welcome to PustakaOne</h1>
           <p className="hero-subtitle">
             Modern digital library platform to manage and borrow book collections
           </p>
