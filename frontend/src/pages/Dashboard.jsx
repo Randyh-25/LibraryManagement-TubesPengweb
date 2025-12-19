@@ -72,7 +72,7 @@ export default function Dashboard() {
             </div>
             <div className="stat-chips">
               <div className="chip">{totalBooks} judul</div>
-              <div className="chip">{stats.totalCopies} eksemplar</div>
+              <div className="chip">{stats.totalCopies} total buku</div>
               <div className="chip">{stats.availableCopies} tersedia</div>
               <div className="chip">{stats.borrowedCopies} dipinjam</div>
             </div>
