@@ -121,21 +121,7 @@ export default function AuthPage({ mode = "login" }) {
                 />
               </div>
               
-              {!isLogin && (
-                <div className="input-group">
-                  <label className="input-label">
-                    Role
-                  </label>
-                  <select
-                    className="input-field"
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
-                  >
-                    <option value="member">Member</option>
-                    <option value="librarian">Librarian</option>
-                  </select>
-                </div>
-              )}
+              {/* Role defaults to member to prevent self-service librarian signups */}
               
               {error && (
                 <div className="auth-error">
