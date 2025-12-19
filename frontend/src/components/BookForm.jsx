@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { cloudinaryApi } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
-export default function BookForm({ initial, onSubmit, onCancel }) {
+export default function BookForm({ initial, onSubmit, onCancel, formId, showActions = true }) {
   const [previewImage, setPreviewImage] = useState(initial?.cover_url || "");
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -137,7 +137,11 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
   };
 
   return (
-    <form className="form grid book-form" onSubmit={handleSubmit(handleFormSubmit)}>
+    <form
+      id={formId || "book-form"}
+      className="form grid book-form"
+      onSubmit={handleSubmit(handleFormSubmit)}
+    >
       <div className="form-group">
         <input
           placeholder="Judul"
@@ -166,10 +170,78 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
         />
         {errors.category && <span className="error">{errors.category.message}</span>}
       </div>
+      <div className="form-group">
+        <label>
+          <span>Total buku</span>
+          <div className="number-input-wrapper">
+            <button
+              type="button"
+              className="number-btn decrement"
+              onClick={() => handleDecrement("copies_total", 1)}
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min={1}
+              className="number-input"
+              {...register("copies_total", {
+                required: "Total copies is required",
+                valueAsNumber: true,
+                min: { value: 1, message: "Must be at least 1" },
+              })}
+            />
+            <button
+              type="button"
+              className="number-btn increment"
+              onClick={() => handleIncrement("copies_total", 1)}
+            >
+              +
+            </button>
+          </div>
+        </label>
+        {errors.copies_total && (
+          <span className="error">{errors.copies_total.message}</span>
+        )}
+      </div>
+      <div className="form-group">
+        <label>
+          <span>Buku tersedia</span>
+          <div className="number-input-wrapper">
+            <button
+              type="button"
+              className="number-btn decrement"
+              onClick={() => handleDecrement("copies_available", 0)}
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min={0}
+              className="number-input"
+              {...register("copies_available", {
+                required: "Available copies is required",
+                valueAsNumber: true,
+                min: { value: 0, message: "Cannot be negative" },
+              })}
+            />
+            <button
+              type="button"
+              className="number-btn increment"
+              onClick={() => handleIncrement("copies_available", 0)}
+            >
+              +
+            </button>
+          </div>
+        </label>
+        {errors.copies_available && (
+          <span className="error">{errors.copies_available.message}</span>
+        )}
+      </div>
       <div className="form-group" style={{ gridColumn: "1 / -1" }}>
         <label>
           <span>Sampul buku (opsional)</span>
-          <div className="image-upload-container">
+          <div className={`image-upload-container ${previewImage ? "has-preview" : ""}`}>
             <div 
               className={`drop-zone ${isDragging ? 'dragging' : ''} ${uploading ? 'uploading' : ''}`}
               onDragEnter={handleDragEnter}
@@ -225,84 +297,18 @@ export default function BookForm({ initial, onSubmit, onCancel }) {
         </small>
         <input type="hidden" {...register("cover_url")} />
       </div>
-      <div className="form-group">
-        <label>
-          <span>Total eksemplar</span>
-          <div className="number-input-wrapper">
-            <button
-              type="button"
-              className="number-btn decrement"
-              onClick={() => handleDecrement("copies_total", 1)}
-            >
-              −
-            </button>
-            <input
-              type="number"
-              min={1}
-              className="number-input"
-              {...register("copies_total", {
-                required: "Total copies is required",
-                valueAsNumber: true,
-                min: { value: 1, message: "Must be at least 1" },
-              })}
-            />
-            <button
-              type="button"
-              className="number-btn increment"
-              onClick={() => handleIncrement("copies_total", 1)}
-            >
-              +
-            </button>
-          </div>
-        </label>
-        {errors.copies_total && (
-          <span className="error">{errors.copies_total.message}</span>
-        )}
-      </div>
-      <div className="form-group">
-        <label>
-          <span>Eksemplar tersedia</span>
-          <div className="number-input-wrapper">
-            <button
-              type="button"
-              className="number-btn decrement"
-              onClick={() => handleDecrement("copies_available", 0)}
-            >
-              −
-            </button>
-            <input
-              type="number"
-              min={0}
-              className="number-input"
-              {...register("copies_available", {
-                required: "Available copies is required",
-                valueAsNumber: true,
-                min: { value: 0, message: "Cannot be negative" },
-              })}
-            />
-            <button
-              type="button"
-              className="number-btn increment"
-              onClick={() => handleIncrement("copies_available", 0)}
-            >
-              +
-            </button>
-          </div>
-        </label>
-        {errors.copies_available && (
-          <span className="error">{errors.copies_available.message}</span>
-        )}
-      </div>
-      <div className="actions">
-        <button className="btn" type="submit">
-          Simpan
-        </button>
-        {onCancel && (
-          <button className="btn ghost" type="button" onClick={onCancel}>
-            Batal
+      {showActions && (
+        <div className="actions form-actions">
+          <button className="btn" type="submit">
+            Simpan
           </button>
-        )}
-      </div>
+          {onCancel && (
+            <button className="btn ghost" type="button" onClick={onCancel}>
+              Batal
+            </button>
+          )}
+        </div>
+      )}
     </form>
   );
 }
