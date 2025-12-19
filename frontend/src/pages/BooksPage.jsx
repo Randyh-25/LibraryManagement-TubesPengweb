@@ -180,9 +180,9 @@ export default function BooksPage() {
               <div key={b.id} className="book-card-modern">
                 <div className="book-cover">
                   <div className="book-cover-image">
-                    {b.cover_image_url ? (
+                    {b.cover_url ? (
                       <img 
-                        src={b.cover_image_url} 
+                        src={b.cover_url} 
                         alt={b.title} 
                         className="book-cover-img"
                         onError={(e) => {
@@ -191,7 +191,7 @@ export default function BooksPage() {
                         }}
                       />
                     ) : null}
-                    <span className="book-icon" style={b.cover_image_url ? {display: 'none'} : {}}>📖</span>
+                    <span className="book-icon" style={b.cover_url ? {display: 'none'} : {}}>📖</span>
                     <div className="book-spine"></div>
                   </div>
                   {b.copies_available > 0 ? (
